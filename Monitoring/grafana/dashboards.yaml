@@ -1,0 +1,24 @@
+# # config file version
+apiVersion: 1
+
+#providers:
+# - name: 'default'
+#   orgId: 1
+#   folder: ''
+#   folderUid: ''
+#   type: file
+#   options:
+#     path: /var/lib/grafana/dashboards
+
+providers:
+- name: DashboardProvider
+  orgId: 1
+  folder: ''
+  type: file
+  disableDeletion: false
+  updateIntervalSeconds: 10
+  allowUiUpdates: false
+  options:
+    path: /var/lib/grafana/dashboards
+    foldersFromFilesStructure: true
+    

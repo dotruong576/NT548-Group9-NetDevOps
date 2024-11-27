@@ -1,0 +1,61 @@
+PLANET-WDAP-C3000AX-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, TimeTicks, enterprises FROM SNMPv2-SMI;
+
+-- Định nghĩa OID cho PLANET Technology
+planetWifi MODULE-IDENTITY
+    LAST-UPDATED "202310100000Z"
+    ORGANIZATION "PLANET Technology Corp."
+    CONTACT-INFO "support@planet.com"
+    DESCRIPTION
+        "MIB for PLANET WDAP-C3000AX Managed Wi-Fi Access Point."
+    ::= { enterprises 10456 }
+
+planetWifiSystem OBJECT IDENTIFIER ::= { planetWifi 10 }
+
+-- Định nghĩa các đối tượng tùy chỉnh cho giám sát Wi-Fi
+
+deviceDescription OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Description of the Wi-Fi device."
+    ::= { planetWifiSystem 1 }
+
+deviceUptime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "System uptime of the Wi-Fi device."
+    ::= { planetWifiSystem 2 }
+
+signalStrength OBJECT-TYPE
+    SYNTAX      INTEGER (0..100)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Signal strength of the Wi-Fi device."
+    ::= { planetWifiSystem 3 }
+
+connectedClients OBJECT-TYPE
+    SYNTAX      INTEGER (0..1000)
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Number of clients currently connected to the Wi-Fi device."
+    ::= { planetWifiSystem 4 }
+
+txPowerLevel OBJECT-TYPE
+    SYNTAX      INTEGER (1..30)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Transmission power level of the Wi-Fi device in dBm."
+    ::= { planetWifiSystem 5 }
+
+channelFrequency OBJECT-TYPE
+    SYNTAX      INTEGER (1..165)
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION "Wi-Fi channel frequency of the device."
+    ::= { planetWifiSystem 6 }
+
+END

@@ -1,0 +1,112 @@
+name: Deploy with Ansible
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+  ANSIBLE_PASSWORD: ${{ secrets.ANSIBLE_PASSWORD }}
+  GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
+  GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+
+permissions:
+  contents: read
+
+jobs:
+  #Job Build
+  build:
+    name: Build
+    runs-on: self-hosted
+    environment: production
+    steps:
+      #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
+      # Install Ansible
+    - name: Install Ansible
+      run: |
+        sudo apt update
+        sudo apt install -y ansible
+
+    # Install python and modules
+    - name: Install Modules
+      run: |
+        sudo apt install python3 python3-pip -y
+        pip3 install paramiko --no-input
+        sudo pip3 install ansible-lint
+        sudo pip3 install --upgrade ansible
+        sudo pip3 install --upgrade ansible-core
+
+    # Install Docker
+    - name: Install Docker
+      run: |
+        sudo apt update
+        sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        sudo apt install docker-ce -y
+        sudo usermod -aG docker ${USER}
+    # Set Grafana secrets in .grafana.secret
+    - name: Set Grafana secrets in .grafana.secret
+      run: |
+        cd Monitoring
+        echo "GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}" > .grafana.secret
+        echo "GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}" >> .grafana.secret
+
+    # Install Monitoring Server
+    - name: Install Monitoring Server
+      run: |
+        cd Monitoring
+        sudo docker compose up -d
+        sudo docker compose start
+        cd snmp-exporter
+        sudo docker run -i --rm -v $(pwd)/mibs:/opt/mibs -v $(pwd)/generator.yml:/opt/generator.yml -v $(pwd):/opt prom/snmp-generator:main generate
+        cd ..
+        sudo docker compose restart
+  
+  #Job Lint
+  lint:
+    name: Lint
+    runs-on: self-hosted
+    needs: build
+    environment: production
+    steps:
+    #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Run ansible-lint
+    - name: Run ansible-lint
+      run: |
+        cd Network
+        ansible-lint --fix playbook.yml 
+
+  #Job Test
+  test:
+    name: Test
+    runs-on: self-hosted
+    needs: lint
+    environment: production
+    steps:
+      #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
+  #Job Deploy
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: test
+    steps:
+      # Checkout code from repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Run Ansible Playbook
+      - name: Run Ansible Playbook
+        run: |
+          cd Network
+          ansible-playbook -i inventory playbook.yml

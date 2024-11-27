@@ -1,0 +1,42 @@
+#sudo docker run -it --rm -v $(pwd)/mibs:/opt/mibs -v $(pwd)/generator.yml:/opt/generator.yml -v $(pwd):/opt prom/snmp-generator:main generate
+---
+auths:
+  Secret_v1:
+    version: 1
+  public_v2:
+    version: 2
+
+modules:
+  cisco_switch:
+    walk:
+      - 1.3.6.1.2.1.1.1 # sysDescr Defined with SNMPv2-MIB.mib
+      - 1.3.6.1.2.1.1.2
+      - 1.3.6.1.2.1.1.3 # sysUpTime Defined with SNMPv2-MIB.mib
+      - 1.3.6.1.2.1.1.5 # sysName Defined with SNMPv2-MIB.mib
+      - 1.3.6.1.2.1.1.9.1.3
+      - 1.3.6.1.2.1.31.1.1 # ifXEntry Defined with IF-MIB.mib
+      - 1.3.6.1.2.1.31.1.2 # ifStackTable Defined with IF-MIB.mib
+      - cieIfPacketStatsEntry # Defined with CISCO-IF-EXTENSION-MIB.mib
+      - 1.3.6.1.2.1.1.4 # sysContact Defined with SNMPv2-MIB.mib
+      - 1.3.6.1.2.1.2.2 # ifTable Defined with MRVINREACH.mib
+      - 1.3.6.1.4.1.9.9.48.1.1.1.5 # ciscoMemoryPoolUsed Defined with CISCO-MEMORY-POOL-MIB.mib
+      - 1.3.6.1.4.1.9.9.48.1.1.1.6 # ciscoMemoryPoolFree Defined with CISCO-MEMORY-POOL-MIB.mib
+      - 1.3.6.1.4.1.9.9.109.1.1 # cpmCPU Defined with CISCO-PROCESS-MIB.mib
+    lookups:
+      - source_indexes: [ifIndex]
+        lookup: ifAlias
+      - source_indexes: [ifIndex]
+        lookup: ifDescr
+      - source_indexes: [ifIndex]
+        # Use OID to avoid conflict with Netscaler NS-ROOT-MIB.
+        lookup: 1.3.6.1.2.1.31.1.1.1.1 # ifName
+    overrides:
+      ifAlias:
+        ignore: true # Lookup metric
+      ifDescr:
+        ignore: true # Lookup metric
+      ifName:
+        ignore: true # Lookup metric
+      ifType:
+        type: EnumAsInfo
+

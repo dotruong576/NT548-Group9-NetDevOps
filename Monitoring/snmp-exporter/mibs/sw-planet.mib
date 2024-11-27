@@ -1,0 +1,40 @@
+PLANET-IGS-4215-4T2S-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, TimeTicks FROM SNMPv2-SMI;
+
+-- Định nghĩa OID cho enterprises
+enterprises OBJECT IDENTIFIER ::= { iso(1) org(3) dod(6) internet(1) private(4) 1 }
+
+planetSwitch MODULE-IDENTITY
+    LAST-UPDATED "202310100000Z"
+    ORGANIZATION "PLANET Technology Corp."
+    CONTACT-INFO "support@planet.com"
+    DESCRIPTION
+        "MIB for PLANET IGS-4215-4T2S Managed Switch."
+    ::= { enterprises 10456 }
+
+planetSwitchSystem OBJECT IDENTIFIER ::= { planetSwitch 9 }
+
+deviceDescription OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "Description of the device."
+    ::= { planetSwitchSystem 1 }
+
+deviceUptime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "System uptime."
+    ::= { planetSwitchSystem 2 }
+
+etherStatsOwner OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION "The physical address of this station."
+    ::= { planetSwitchSystem 3 }
+
+END
