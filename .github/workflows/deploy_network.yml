@@ -117,7 +117,7 @@ jobs:
           cd Network
           if [[ "${{ env.COMMIT_MSG }}" == *"playbook"* ]]; then
             ansible-playbook -i inventory playbook.yml
-          elif [[ "${{ env.COMMIT_MSG }}" == *"playbook_ISP"* ]]; then
+          elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
             ansible-playbook -i inventory playbook_ISP.yml
           else
             echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
