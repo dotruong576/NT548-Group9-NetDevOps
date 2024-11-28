@@ -116,7 +116,7 @@ jobs:
         run: |
           cd Network
           if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
-            ansible-playbook -i inventory playbook.yml
+            ansible-playbook -i inventory playbook_all.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
             ansible-playbook -i inventory playbook_ISP.yml
           else
