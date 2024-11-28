@@ -1,0 +1,62 @@
+---
+# Deploy configuration to Cisco device ISP
+- name: Deploy configuration to Cisco device ISP
+  hosts: cisco_devices_ISP
+  gather_facts: false
+  tasks:
+    - name: Configure DHCP server
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "ip dhcp pool vlan1"
+          - "network 192.168.1.0 255.255.255.0"
+          - "default-router 192.168.1.1"
+          - "ip dhcp pool vlan2"
+          - "network 192.168.2.0 255.255.255.0"
+          - "default-router 192.168.2.1"
+          - "ip dhcp pool vlan3"
+          - "network 192.168.3.0 255.255.255.0"
+          - "default-router 192.168.3.1"
+
+- name: Deploy configuration to Cisco device ISP 1
+  hosts: cisco_devices_ISP_1
+  gather_facts: false
+  tasks:
+    - name: Configure Ethernet0/2
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface e0/2"
+          - "no shutdown"
+          - "ip address 172.16.11.1 255.255.255.0"
+    - name: Configure Static Route
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "ip route 192.168.1.0 255.255.255.0 172.16.11.2"
+          - "ip route 192.168.2.0 255.255.255.0 172.16.11.2"
+          - "ip route 192.168.3.0 255.255.255.0 172.16.11.2"
+          
+- name: Deploy configuration to Cisco device ISP 2
+  hosts: cisco_devices_ISP_2
+  gather_facts: false
+  tasks:
+    - name: Configure Ethernet0/2
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface e0/2"
+          - "no shutdown"
+          - "ip address 172.16.12.1 255.255.255.0"
+    - name: Configure Static Route
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "ip route 192.168.1.0 255.255.255.0 172.16.12.2"
+          - "ip route 192.168.2.0 255.255.255.0 172.16.12.2"
+          - "ip route 192.168.3.0 255.255.255.0 172.16.12.2"
