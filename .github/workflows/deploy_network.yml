@@ -82,8 +82,11 @@ jobs:
     - name: Run ansible-lint
       run: |
         cd Network
-        ansible-lint --fix playbook_all.yml
+        ansible-lint --fix playbook_ALL.yml
         ansible-lint --fix playbook_ISP.yml 
+        ansible-lint --fix playbook_CORE.yml
+        ansible-lint --fix playbook_DIST.yml
+        ansible-lint --fix playbook_ACC.yml 
 
   #Job Test
   test:
@@ -117,9 +120,15 @@ jobs:
         run: |
           cd Network
           if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
-            ansible-playbook -i inventory playbook_all.yml
+            ansible-playbook -i inventory playbook_ALL.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
             ansible-playbook -i inventory playbook_ISP.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"CORE"* ]]; then
+            ansible-playbook -i inventory playbook_CORE.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"DIST"* ]]; then
+            ansible-playbook -i inventory playbook_DIST.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"ACC"* ]]; then
+            ansible-playbook -i inventory playbook_ACC.yml
           else
             echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
           fi

@@ -1,0 +1,104 @@
+---
+# Deploy configuration to Cisco device CORE
+- name: Deploy configuration to Cisco device CORE
+  hosts: cisco_devices_CORE
+  gather_facts: false
+  tasks:
+    - name: Configure Ethernet0/1-2
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface range Ethernet0/1-2"
+          - "no sh"
+    - name: Configure Ethernet0/2.1
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.1"
+          - "encapsulation dot1Q 1"
+          - "ip address 192.168.1.1 255.255.255.0"
+    - name: Configure Ethernet0/2.2
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.2"
+          - "encapsulation dot1Q 2"
+          - "ip address 192.168.2.1 255.255.255.0"
+    - name: Configure Ethernet0/2.3
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.3"
+          - "encapsulation dot1Q 3"
+          - "ip address 192.168.3.1 255.255.255.0"
+    
+- name: Deploy configuration to Cisco device CORE 1
+  hosts: cisco_devices_CORE_1
+  gather_facts: false
+  tasks:
+    - name: Configure Ethernet0/1
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/1"
+          - "ip address 172.16.11.2 255.255.255.0"
+    - name: Configure Ethernet0/2.1
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.1"
+          - "ip helper-address 172.16.11.1"
+    - name: Configure Ethernet0/2.2
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.2"
+          - "ip helper-address 172.16.11.1"
+    - name: Configure Ethernet0/2.3
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.3"
+          - "ip helper-address 172.16.11.1"
+    
+- name: Deploy configuration to Cisco device CORE 2
+  hosts: cisco_devices_CORE_2
+  gather_facts: false
+  tasks:
+    - name: Configure Ethernet0/1
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/1"
+          - "ip address 172.16.12.2 255.255.255.0"
+    - name: Configure Ethernet0/2.1
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.1"
+          - "ip helper-address 172.16.12.1"
+    - name: Configure Ethernet0/2.2
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.2"
+          - "ip helper-address 172.16.12.1"
+    - name: Configure Ethernet0/2.3
+      cisco.ios.ios_command:
+        commands:
+          - "enable"
+          - "config terminal"
+          - "interface Ethernet0/2.3"
+          - "ip helper-address 172.16.12.1"
+    
