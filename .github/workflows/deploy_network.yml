@@ -95,22 +95,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-  #Job Deploy
-  deploy:
-    name: Deploy
-    runs-on: self-hosted
-    needs: test
-    steps:
-      # Checkout code from repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Run Ansible Playbook
-      - name: Run Ansible Playbook
-        run: |
-          cd Network
-          ansible-playbook -i inventory playbook.yml
-
   # Job Deploy
   deploy:
     name: Deploy
@@ -132,7 +116,7 @@ jobs:
         run: |
           cd Network
           if [[ "${{ env.COMMIT_MSG }}" == *"playbook"* ]]; then
-            ansible-playbook -i inventory playbook1.yml
+            ansible-playbook -i inventory playbook.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"playbook2"* ]]; then
             ansible-playbook -i inventory playbook2.yml
           else
