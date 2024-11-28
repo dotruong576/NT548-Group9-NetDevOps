@@ -29,7 +29,6 @@
           - "enable"
           - "config terminal"
           - "interface e0/2"
-          - "no switchport"
           - "no shutdown"
           - "ip address 172.16.11.1 255.255.255.0"
     - name: Configure Static Route
@@ -51,7 +50,6 @@
           - "enable"
           - "config terminal"
           - "interface e0/2"
-          - "no switchport"
           - "no shutdown"
           - "ip address 172.16.12.1 255.255.255.0"
     - name: Configure Static Route
@@ -75,7 +73,6 @@
           - "config terminal"
           - "interface range Ethernet0/1-2"
           - "no sh"
-          - "no switchport"
     - name: Configure Ethernet0/2.1
       cisco.ios.ios_command:
         commands:
@@ -390,4 +387,3 @@
           - "interface vlan 3"
           - "ip address 192.168.3.254 255.255.255.0"
           - "no sh"
-          
