@@ -110,3 +110,31 @@ jobs:
         run: |
           cd Network
           ansible-playbook -i inventory playbook.yml
+
+  # Job Deploy
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: test
+    steps:
+      # Checkout code from repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Get commit message
+      - name: Get Commit Message
+        id: commit_message
+        run: |
+          echo "COMMIT_MSG=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+
+      # Run Ansible Playbook based on commit message
+      - name: Run Ansible Playbook
+        run: |
+          cd Network
+          if [[ "${{ env.COMMIT_MSG }}" == *"playbook"* ]]; then
+            ansible-playbook -i inventory playbook1.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"playbook2"* ]]; then
+            ansible-playbook -i inventory playbook2.yml
+          else
+            echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
+          fi
