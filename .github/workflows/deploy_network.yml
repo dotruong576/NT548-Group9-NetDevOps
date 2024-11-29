@@ -20,6 +20,7 @@ jobs:
     name: Build
     runs-on: self-hosted
     environment: production
+    if: contains(github.event.head_commit.message, 'deploy')
     steps:
       #Checkout the code
     - name: Checkout
@@ -40,6 +41,17 @@ jobs:
         sudo pip3 install --upgrade ansible
         sudo pip3 install --upgrade ansible-core
 
+  #Job monitor
+  monitoring:
+    name: Monitor
+    runs-on: self-hosted
+    environment: production
+    if: contains(github.event.head_commit.message, 'monitor')
+    steps:
+    #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
     # Install Docker
     - name: Install Docker
       run: |
@@ -49,6 +61,7 @@ jobs:
         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
         sudo apt install docker-ce -y
         sudo usermod -aG docker ${USER}
+
     # Set Grafana secrets in .grafana.secret
     - name: Set Grafana secrets in .grafana.secret
       run: |
@@ -63,7 +76,7 @@ jobs:
         sudo docker compose up -d
         sudo docker compose start
         cd snmp-exporter
-        sudo docker run -i --rm -v $(pwd)/mibs:/opt/mibs -v $(pwd)/generator.yml:/opt/generator.yml -v $(pwd):/opt prom/snmp-generator:main generate
+        sudo docker run --rm -v $(pwd)/mibs:/opt/mibs -v $(pwd)/generator.yml:/opt/generator.yml -v $(pwd):/opt prom/snmp-generator:main generate
         cd ..
         sudo docker compose restart
   
