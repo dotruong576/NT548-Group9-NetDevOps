@@ -95,6 +95,7 @@ jobs:
     - name: Run ansible-lint
       run: |
         cd Network
+        ansible-lint --fix playbook_all.yml
         ansible-lint --fix playbook_ISP.yml 
         ansible-lint --fix playbook_CORE.yml
         ansible-lint --fix playbook_DIST.yml
@@ -132,7 +133,7 @@ jobs:
         run: |
           cd Network
           if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
-            ansible-playbook -i inventory playbook_ALL.yml
+            ansible-playbook -i inventory playbook_all.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
             ansible-playbook -i inventory playbook_ISP.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"CORE"* ]]; then
