@@ -1,0 +1,40 @@
+driver:
+  name: docker
+  options:
+    container_name: test-cisco-device
+    image: ubuntu:22.04
+    privileged: true
+    network_mode: host
+    volumes:
+      - /tmp:/tmp
+
+platforms:
+  - name: test-cisco-device
+    image: ubuntu:22.04
+    pre_build_image: true
+    privileged: true
+    network_mode: host
+    command: bash -c "apt update && apt install -y openssh-server curl && sleep infinity"
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: playbook_all.yml   # Chỉ định playbook của bạn ở đây
+  inventory:
+    links:
+      host: inventory.ini       # Chỉ định file inventory.ini
+
+scenario:
+  name: default
+  test_sequence:
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - converge
+    - verify
+    - cleanup
+    - destroy
+    
+verifier:
+  name: ansible

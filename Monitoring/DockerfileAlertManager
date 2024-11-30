@@ -1,0 +1,14 @@
+# Dockerfile for Alertmanager
+FROM prom/alertmanager:latest
+
+# Set the user to root (optional, if needed for permission purposes)
+USER root
+
+# Copy configuration files if you have custom ones
+COPY ./alertmanager/ /etc/alertmanager/
+
+# Expose the port that Alertmanager uses
+EXPOSE 9093
+
+# Set the default command to start Alertmanager
+CMD [ "--config.file=/etc/alertmanager/alertmanager.yml" ]

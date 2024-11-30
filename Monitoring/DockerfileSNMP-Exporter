@@ -1,0 +1,11 @@
+# Use the official snmp-exporter image as a base
+FROM prom/snmp-exporter:latest
+
+# Set the user to root (optional, if needed for permission purposes)
+USER root
+
+# Copy the custom snmp.yml configuration file
+COPY snmp-exporter/snmp.yml /etc/snmp-exporter/snmp.yml
+
+# Expose port 9116 for SNMP metrics
+EXPOSE 9116

@@ -1,0 +1,17 @@
+# Sử dụng image Prometheus chính thức làm base
+FROM prom/prometheus:latest
+
+# Thiết lập user làm root (nếu cần chạy lệnh với quyền admin)
+USER root
+
+# Sao chép file cấu hình Prometheus từ thư mục hiện tại vào container
+COPY prometheus/prometheus.yml /etc/prometheus/prometheus.yml
+
+# Sao chép các quy tắc alert (nếu có)
+COPY alert-rules/ /etc/prometheus/rules/
+
+# Mở port 9090
+EXPOSE 9090
+
+# Chạy Prometheus với các tham số
+CMD ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=15d", "--storage.tsdb.path=data/"]

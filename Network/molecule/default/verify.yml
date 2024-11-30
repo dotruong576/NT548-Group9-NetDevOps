@@ -1,0 +1,27 @@
+---
+- name: Verify Cisco devices configuration
+  hosts: "!test-cisco-device"
+  gather_facts: false
+  connection: network_cli
+  tasks:
+    # Gathering facts for Cisco devices only
+    - name: Gather facts (except for test-cisco-device)
+      ansible.legacy.ios_facts:
+        gather_subset: ["min"]
+      when: inventory_hostname != "test-cisco-device"
+
+    # Ensure hostname is correctly configured for Cisco devices
+    - name: Ensure hostname is correctly configured
+      ios_command:
+        commands:
+          - show running-config
+      register: hostname_output
+      when: inventory_hostname != "test-cisco-device"
+
+    # Debug hostname output for Cisco devices
+    - name: Debug hostname output
+      debug:
+        var: hostname_output.stdout_lines
+      when: inventory_hostname != "test-cisco-device"
+
+

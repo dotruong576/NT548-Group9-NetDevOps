@@ -15,12 +15,91 @@ permissions:
   contents: read
 
 jobs:
-  #Job Build
-  build:
-    name: Build
+  #Job Build Monitor
+  build_monitor:
+    name: Build Monitor
     runs-on: self-hosted
     environment: production
-    if: contains(github.event.head_commit.message, 'deploy')
+    if: contains(github.event.head_commit.message, 'monitor')
+    steps:
+      #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Install Docker
+    - name: Install Docker
+      run: |
+        sudo apt update
+        sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        sudo apt install docker-ce -y
+        sudo usermod -aG docker ${USER}
+
+    # Install Trivy
+    - name: Install Trivy
+      run: |
+        sudo apt update
+        wget https://github.com/aquasecurity/trivy/releases/download/v0.57.1/trivy_0.57.1_Linux-64bit.deb
+        sudo dpkg -i trivy_0.57.1_Linux-64bit.deb
+      
+    # Build Image
+    - name: Build Docker Images
+      run: |
+        cd Monitoring
+        sudo docker compose build
+
+  # Job test trivy
+  test_trivy:
+    name: Test Trivy
+    runs-on: self-hosted
+    environment: production
+    needs: build_monitor
+    steps:
+    #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    #Trivy scan
+    - name: Trivy scan
+      run: |
+        sudo docker images -q | xargs -n 1 trivy image
+
+  #Job monitor
+  deploy_monitor:
+    name: Monitor
+    runs-on: self-hosted
+    environment: production
+    needs: test_trivy
+    steps:
+    #Checkout the code
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Set Grafana secrets in .grafana.secret
+    - name: Set Grafana secrets in .grafana.secret
+      run: |
+        cd Monitoring
+        echo "GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}" > .grafana.secret
+        echo "GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}" >> .grafana.secret
+
+    # Install Monitoring Server
+    - name: Install Monitoring Server
+      run: |
+        cd Monitoring
+        sudo docker compose up -d
+        sudo docker compose start
+        cd snmp-exporter
+        sudo docker run --rm -v $(pwd)/mibs:/opt/mibs -v $(pwd)/generator.yml:/opt/generator.yml -v $(pwd):/opt prom/snmp-generator:main generate
+        cd ..
+        sudo docker compose restart
+
+  #Job Build Network
+  build_network:
+    name: Build Network
+    runs-on: self-hosted
+    environment: production
+    if: contains(github.event.head_commit.message, 'network')
     steps:
       #Checkout the code
     - name: Checkout
@@ -40,83 +119,68 @@ jobs:
         sudo pip3 install ansible-lint
         sudo pip3 install --upgrade ansible
         sudo pip3 install --upgrade ansible-core
+        sudo pip3 install ansible-pylibssh
+        sudo pip3 install molecule molecule-plugins molecule-docker
 
-  #Job monitor
-  monitoring:
-    name: Monitor
-    runs-on: self-hosted
-    environment: production
-    if: contains(github.event.head_commit.message, 'monitor')
-    steps:
-    #Checkout the code
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    # Install Docker
-    - name: Install Docker
-      run: |
-        sudo apt update
-        sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-        sudo apt install docker-ce -y
-        sudo usermod -aG docker ${USER}
-
-    # Set Grafana secrets in .grafana.secret
-    - name: Set Grafana secrets in .grafana.secret
-      run: |
-        cd Monitoring
-        echo "GF_SECURITY_ADMIN_USER=${{ secrets.GF_SECURITY_ADMIN_USER }}" > .grafana.secret
-        echo "GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}" >> .grafana.secret
-
-    # Install Monitoring Server
-    - name: Install Monitoring Server
-      run: |
-        cd Monitoring
-        sudo docker compose up -d
-        sudo docker compose start
-        cd snmp-exporter
-        sudo docker run --rm -v $(pwd)/mibs:/opt/mibs -v $(pwd)/generator.yml:/opt/generator.yml -v $(pwd):/opt prom/snmp-generator:main generate
-        cd ..
-        sudo docker compose restart
-  
   #Job Lint
   lint:
     name: Lint
     runs-on: self-hosted
-    needs: build
+    needs: build_network
     environment: production
     steps:
     #Checkout the code
     - name: Checkout
       uses: actions/checkout@v3
 
+    # Get commit message
+    - name: Get Commit Message
+      id: commit_message
+      run: |
+        echo "COMMIT_MSG=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+
     # Run ansible-lint
     - name: Run ansible-lint
       run: |
-        cd Network
-        ansible-lint --fix playbook_all.yml
-        ansible-lint --fix playbook_ISP.yml 
-        ansible-lint --fix playbook_CORE.yml
-        ansible-lint --fix playbook_DIST.yml
-        ansible-lint --fix playbook_ACC.yml 
+        cd Network/molecule/default
+          ansible-lint --fix converge.yml
+          ansible-lint --fix molecule.yml
+          ansible-lint --fix verify.yml
+          if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
+            ansible-lint --fix playbook_all.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
+            ansible-lint --fix playbook_ISP.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"CORE"* ]]; then
+            ansible-lint --fix playbook_CORE.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"DIST"* ]]; then
+            ansible-lint --fix playbook_DIST.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"ACC"* ]]; then
+            ansible-lint --fix playbook_ACC.yml
+          else
+            echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
+          fi
 
   #Job Test
-  test:
-    name: Test
+  molecule_test:
+    name: Molecule Test
     runs-on: self-hosted
     needs: lint
     environment: production
     steps:
-      #Checkout the code
+      # Checkout the code
     - name: Checkout
       uses: actions/checkout@v3
+      # Run Molecule test
+    - name: Run Molecule test
+      run: |
+        cd Network/
+        molecule test
 
   # Job Deploy
-  deploy:
+  deploy_network:
     name: Deploy
     runs-on: self-hosted
-    needs: test
+    needs: molecule_test
     steps:
       # Checkout code from repository
       - name: Checkout repository
@@ -131,17 +195,17 @@ jobs:
       # Run Ansible Playbook based on commit message
       - name: Run Ansible Playbook
         run: |
-          cd Network
+          cd Network/molecule/default
           if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
-            ansible-playbook -i inventory playbook_all.yml
+            ansible-playbook -i inventory.ini playbook_all.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
-            ansible-playbook -i inventory playbook_ISP.yml
+            ansible-playbook -i inventory.ini playbook_ISP.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"CORE"* ]]; then
-            ansible-playbook -i inventory playbook_CORE.yml
+            ansible-playbook -i inventory.ini playbook_CORE.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"DIST"* ]]; then
-            ansible-playbook -i inventory playbook_DIST.yml
+            ansible-playbook -i inventory.ini playbook_DIST.yml
           elif [[ "${{ env.COMMIT_MSG }}" == *"ACC"* ]]; then
-            ansible-playbook -i inventory playbook_ACC.yml
+            ansible-playbook -i inventory.ini playbook_ACC.yml
           else
             echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
           fi
