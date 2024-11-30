@@ -95,7 +95,6 @@ jobs:
     - name: Run ansible-lint
       run: |
         cd Network
-        ansible-lint --fix playbook_ALL.yml
         ansible-lint --fix playbook_ISP.yml 
         ansible-lint --fix playbook_CORE.yml
         ansible-lint --fix playbook_DIST.yml
