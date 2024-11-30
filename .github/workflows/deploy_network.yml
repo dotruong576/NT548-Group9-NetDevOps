@@ -95,11 +95,11 @@ jobs:
     - name: Run ansible-lint
       run: |
         cd Network
-        ansible-lint --fix playbook_ALL.yml
-        ansible-lint --fix playbook_ISP.yml 
-        ansible-lint --fix playbook_CORE.yml
-        ansible-lint --fix playbook_DIST.yml
-        ansible-lint --fix playbook_ACC.yml 
+        ansible-lint playbook_ALL.yml --fix
+        ansible-lint playbook_ISP.yml --fix
+        ansible-lint playbook_CORE.yml --fix
+        ansible-lint playbook_DIST.yml --fix
+        ansible-lint playbook_ACC.yml --fix
 
   #Job Test
   test:
