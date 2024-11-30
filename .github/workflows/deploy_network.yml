@@ -95,11 +95,11 @@ jobs:
     - name: Run ansible-lint
       run: |
         cd Network
-        ansible-lint playbook_ALL.yml --fix
-        ansible-lint playbook_ISP.yml --fix
-        ansible-lint playbook_CORE.yml --fix
-        ansible-lint playbook_DIST.yml --fix
-        ansible-lint playbook_ACC.yml --fix
+        ansible-lint --fix playbook_ALL.yml
+        ansible-lint --fix playbook_ISP.yml 
+        ansible-lint --fix playbook_CORE.yml
+        ansible-lint --fix playbook_DIST.yml
+        ansible-lint --fix playbook_ACC.yml 
 
   #Job Test
   test:
@@ -122,13 +122,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get changed files
+      # Get commit message
+      - name: Get Commit Message
+        id: commit_message
         run: |
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
-          echo "$CHANGED_FILES" > changed_files.txt
-      
-      - name: Deploy changed files
+          echo "COMMIT_MSG=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+
+      # Run Ansible Playbook based on commit message
+      - name: Run Ansible Playbook
         run: |
-          for file in $(cat changed_files.txt); do
-            echo "Deploying $file"
-          done
+          cd Network
+          if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
+            ansible-playbook -i inventory playbook_ALL.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
+            ansible-playbook -i inventory playbook_ISP.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"CORE"* ]]; then
+            ansible-playbook -i inventory playbook_CORE.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"DIST"* ]]; then
+            ansible-playbook -i inventory playbook_DIST.yml
+          elif [[ "${{ env.COMMIT_MSG }}" == *"ACC"* ]]; then
+            ansible-playbook -i inventory playbook_ACC.yml
+          else
+            echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
+          fi
