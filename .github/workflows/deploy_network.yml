@@ -122,26 +122,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Get commit message
-      - name: Get Commit Message
-        id: commit_message
+      - name: Get changed files
         run: |
-          echo "COMMIT_MSG=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
-
-      # Run Ansible Playbook based on commit message
-      - name: Run Ansible Playbook
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "$CHANGED_FILES" > changed_files.txt
+      
+      - name: Deploy changed files
         run: |
-          cd Network
-          if [[ "${{ env.COMMIT_MSG }}" == *"all devices"* ]]; then
-            ansible-playbook -i inventory playbook_all.yml
-          elif [[ "${{ env.COMMIT_MSG }}" == *"ISP"* ]]; then
-            ansible-playbook -i inventory playbook_ISP.yml
-          elif [[ "${{ env.COMMIT_MSG }}" == *"CORE"* ]]; then
-            ansible-playbook -i inventory playbook_CORE.yml
-          elif [[ "${{ env.COMMIT_MSG }}" == *"DIST"* ]]; then
-            ansible-playbook -i inventory playbook_DIST.yml
-          elif [[ "${{ env.COMMIT_MSG }}" == *"ACC"* ]]; then
-            ansible-playbook -i inventory playbook_ACC.yml
-          else
-            echo "No matching playbook found for commit message: ${{ env.COMMIT_MSG }}"
-          fi
+          for file in $(cat changed_files.txt); do
+            # Logic để deploy từng file
+            echo "Deploying $file"
+          done
