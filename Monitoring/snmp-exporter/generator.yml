@@ -39,4 +39,3 @@ modules:
         ignore: true # Lookup metric
       ifType:
         type: EnumAsInfo
-
