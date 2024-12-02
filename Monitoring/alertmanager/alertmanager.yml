@@ -15,7 +15,8 @@ receivers:
     from: "dotruong576@gmail.com"
     smarthost: "smtp.gmail.com:587"
     auth_username: "dotruong576@gmail.com"
-    auth_password: ${EMAIL_PASSWORD}
+    auth_password: "qkab mesw ikcb rwub" 
     require_tls: true
     tls_config:
       insecure_skip_verify: false
+
