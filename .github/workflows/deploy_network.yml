@@ -90,8 +90,8 @@ jobs:
     # Install Monitoring Server
     - name: Install Monitoring Server
       env:
-      SNMP_PASSWORD: ${{ secrets.SNMP_PASSWORD }}
-      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+       SNMP_PASSWORD: ${{ secrets.SNMP_PASSWORD }}
+       EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: |
         cd Monitoring
         sudo docker compose up -d
