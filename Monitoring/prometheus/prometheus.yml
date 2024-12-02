@@ -23,7 +23,7 @@ scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "prometheus"
     static_configs:
-      - targets: ["192.168.101.146:9090"]
+      - targets: ["192.168.101.133:9090"]
         labels:
           hostname: PrometheusProd
           type: docker
@@ -31,7 +31,7 @@ scrape_configs:
 
   - job_name: "node-exporter"
     static_configs:
-      - targets: ["192.168.101.146:9100"]
+      - targets: ["192.168.101.133:9100"]
         labels:
           hostname: linux
           type: linux-server
@@ -84,6 +84,6 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: '192.168.101.146:9116'
+        replacement: '192.168.101.133:9116'
     tls_config:
       insecure_skip_verify: true

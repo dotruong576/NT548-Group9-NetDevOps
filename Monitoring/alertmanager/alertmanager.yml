@@ -14,7 +14,7 @@ receivers:
   - to: "dotruong576@gmail.com"
     from: "dotruong576@gmail.com"
     smarthost: "smtp.gmail.com:587"
-    auth_username: dotruong576@gmail.com
+    auth_username: "dotruong576@gmail.com"
     auth_password: ${EMAIL_PASSWORD}
     require_tls: true
     tls_config:
