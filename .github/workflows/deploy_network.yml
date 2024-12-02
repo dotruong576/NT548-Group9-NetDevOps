@@ -10,6 +10,8 @@ env:
   ANSIBLE_PASSWORD: ${{ secrets.ANSIBLE_PASSWORD }}
   GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
   GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+  SNMP_PASSWORD: ${{ secrets.SNMP_PASSWORD }}
+  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
 
 permissions:
   contents: read
@@ -69,7 +71,7 @@ jobs:
 
   #Job monitor
   deploy_monitor:
-    name: Monitor
+    name: Deploy Monitor
     runs-on: self-hosted
     environment: production
     needs: test_trivy
@@ -87,6 +89,9 @@ jobs:
 
     # Install Monitoring Server
     - name: Install Monitoring Server
+      env:
+      SNMP_PASSWORD: ${{ secrets.SNMP_PASSWORD }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: |
         cd Monitoring
         sudo docker compose up -d
@@ -126,7 +131,7 @@ jobs:
 
   #Job Lint
   lint:
-    name: Lint
+    name: Test Lint
     runs-on: self-hosted
     needs: build_network
     environment: production
@@ -164,7 +169,7 @@ jobs:
 
   #Job Test
   molecule_test:
-    name: Molecule Test
+    name: Test Molecule
     runs-on: self-hosted
     needs: lint
     environment: production
@@ -180,7 +185,7 @@ jobs:
 
   # Job Deploy
   deploy_network:
-    name: Deploy
+    name: Deploy Network
     runs-on: self-hosted
     needs: molecule_test
     steps:
