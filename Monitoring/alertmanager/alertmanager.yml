@@ -1,7 +1,7 @@
 global:
   resolve_timeout: 5m
 
-routea:
+route:
   group_by: ["alertname"]
   group_wait: 10s
   group_interval: 10s
@@ -15,8 +15,7 @@ receivers:
     from: "dotruong576@gmail.com"
     smarthost: "smtp.gmail.com:587"
     auth_username: "dotruong576@gmail.com"
-    auth_password: "qkab mesw ikcb rwub" 
+    auth_password: ${EMAIL_PASSWORD}
     require_tls: true
     tls_config:
       insecure_skip_verify: false
-
